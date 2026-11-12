@@ -1,10 +1,10 @@
 from dataclasses import dataclass
 
 import numpy as np
-
+import polars as pl
 from sklearn.base import BaseEstimator
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import roc_auc_score, average_precision_score, log_loss
+from sklearn.metrics import average_precision_score, log_loss, roc_auc_score
 
 
 @dataclass
@@ -23,10 +23,10 @@ class EvaluationResult:
     test_ap: float
 
 
-def train_pipeline(train_df, val_df) -> TrainResult:
-    train_features = train_df.select(["amount", "month"]).to_numpy()
+def train_pipeline(train_df: pl.DataFrame, val_df: pl.DataFrame) -> TrainResult:
+    train_features = train_df.drop("is_fraud").to_numpy()
     train_labels = train_df.select(["is_fraud"]).to_numpy().ravel()
-    val_features = val_df.select(["amount", "month"]).to_numpy()
+    val_features = val_df.drop("is_fraud").to_numpy()
     val_labels = val_df.select(["is_fraud"]).to_numpy().ravel()
 
     model = LogisticRegression(max_iter=5000, class_weight="balanced")
@@ -38,12 +38,12 @@ def train_pipeline(train_df, val_df) -> TrainResult:
         model=model,
         val_log_loss=np.round(log_loss(val_labels, val_pred_probs), 3),
         val_roc_auc=np.round(roc_auc_score(val_labels, val_pred_probs), 3),
-        val_ap=np.round(average_precision_score(val_labels, val_pred_probs), 3)
+        val_ap=np.round(average_precision_score(val_labels, val_pred_probs), 3),
     )
 
 
 def evaluation(test_df, model):
-    test_features = test_df.select(["amount", "month"]).to_numpy()
+    test_features = test_df.drop("is_fraud").to_numpy()
     test_labels = test_df.select(["is_fraud"]).to_numpy().ravel()
 
     test_pred_probs = model.predict(test_features)
@@ -51,6 +51,5 @@ def evaluation(test_df, model):
     return EvaluationResult(
         test_log_loss=np.round(log_loss(test_labels, test_pred_probs), 3),
         test_roc_auc=np.round(roc_auc_score(test_labels, test_pred_probs), 3),
-        test_ap=np.round(average_precision_score(test_labels, test_pred_probs), 3)
+        test_ap=np.round(average_precision_score(test_labels, test_pred_probs), 3),
     )
-

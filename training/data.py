@@ -1,13 +1,9 @@
 import polars as pl
 
-
 SCHEMA = {
     "user": pl.Int32,
     "card": pl.Int32,
-    "year": pl.Int32,
-    "month": pl.Int32,
-    "day": pl.Int32,
-    "time": pl.String,
+    "timestamp": pl.Int64,
     "amount": pl.Float32,
     "use_chip": pl.String,
     "merchant_name": pl.Int64,
@@ -15,7 +11,7 @@ SCHEMA = {
     "merchant_state": pl.String,
     "zip": pl.Int32,
     "mcc": pl.Int32,
-    "is_fraud": pl.Int16
+    "is_fraud": pl.Int16,
 }
 
 
@@ -24,15 +20,26 @@ def preprocess_data(df: pl.DataFrame) -> pl.DataFrame:
         df.rename(lambda column: column.lower().replace(" ", "_").replace("?", ""))
         .with_columns(
             pl.col("is_fraud").replace({"No": 0, "Yes": 1}),
-            pl.col("amount").str.replace("$", "", literal=True)
+            pl.col("amount").str.replace("$", "", literal=True),
+            pl.datetime(
+                pl.col("year"),
+                pl.col("month"),
+                pl.col("day"),
+                pl.col("time").str.split(":").list.get(0).cast(pl.Int32),
+                pl.col("time").str.split(":").list.get(1).cast(pl.Int32),
+            )
+            .dt.epoch("ms")
+            .alias("timestamp"),
         )
-        .drop("errors")
+        .drop("year", "month", "day", "time", "errors")
         .cast(SCHEMA)
     )
 
 
-def split_data(df: pl.DataFrame, val_ratio=0.15, test_ratio=0.15, simul_ratio=0.1) -> tuple[pl.DataFrame, pl.DataFrame, pl.DataFrame, pl.DataFrame]:   
-    df_sorted = df.sort(by=["year", "month", "day"])
+def split_data(
+    df: pl.DataFrame, val_ratio=0.15, test_ratio=0.15, simul_ratio=0.1
+) -> tuple[pl.DataFrame, pl.DataFrame, pl.DataFrame, pl.DataFrame]:
+    df_sorted = df.sort(by="timestamp")
 
     total_rows = len(df_sorted)
     val_size = int(total_rows * val_ratio)

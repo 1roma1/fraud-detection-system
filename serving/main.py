@@ -34,6 +34,7 @@ class PredictionRequest(BaseModel):
     amount: float
     month: int
 
+
 class PredictionResponse(BaseModel):
     prediction: int
     probability: list[float]
@@ -51,18 +52,9 @@ def predict(payload: PredictionRequest):
     if model is None:
         raise HTTPException(status_code=503, detail="Model is not loaded.")
 
-    try:
-        features = [[
-            payload.amount,
-            payload.month
-        ]]
+    features = [[payload.amount, payload.month]]
 
-        prediction = int(model.predict(features)[0])
-        probabilities = model.predict_proba(features)[0].tolist()
+    prediction = int(model.predict(features)[0])
+    probabilities = model.predict_proba(features)[0].tolist()
 
-        return PredictionResponse(prediction=prediction, probability=probabilities)
-
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Prediction failed: {str(e)}"
-        )
+    return PredictionResponse(prediction=prediction, probability=probabilities)

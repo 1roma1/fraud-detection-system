@@ -5,7 +5,6 @@ import polars as pl
 
 from training.data import split_data
 
-
 TRANSACTION_DATA = Path("data") / "prep" / "prep_transaction.parquet"
 SPLIT_DIR = Path("data") / "split"
 
