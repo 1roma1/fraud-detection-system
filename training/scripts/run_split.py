@@ -1,21 +1,19 @@
 import os
-from pathlib import Path
 
 import polars as pl
 
 from training.data import split_data
-
-TRANSACTION_DATA = Path("data") / "prep" / "prep_transaction.parquet"
-SPLIT_DIR = Path("data") / "split"
+from training.config import DataConfig
 
 
 if __name__ == "__main__":
-    transaction_df = pl.read_parquet(TRANSACTION_DATA)
+    config = DataConfig()
+    transaction_df = pl.read_parquet(config.prep_dataset_path)
 
     train_df, val_df, test_df, simul_df = split_data(transaction_df)
 
-    os.makedirs(SPLIT_DIR, exist_ok=True)
-    train_df.write_parquet(SPLIT_DIR / "train_transaction.parquet")
-    val_df.write_parquet(SPLIT_DIR / "val_transaction.parquet")
-    test_df.write_parquet(SPLIT_DIR / "test_transaction.parquet")
-    simul_df.write_parquet(SPLIT_DIR / "simul_transaction.parquet")
+    os.makedirs(config.train_dataset_path.parent, exist_ok=True)
+    train_df.write_parquet(config.train_dataset_path)
+    val_df.write_parquet(config.val_dataset_path)
+    test_df.write_parquet(config.test_dataset_path)
+    simul_df.write_parquet(config.simul_dataset_path)
