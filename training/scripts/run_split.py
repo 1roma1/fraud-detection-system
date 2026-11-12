@@ -6,12 +6,12 @@ import polars as pl
 from training.data import split_data
 
 
-RAW_TRANSACTION_DATA = Path("data") / "raw" / "transaction.csv"
+TRANSACTION_DATA = Path("data") / "prep" / "prep_transaction.parquet"
 SPLIT_DIR = Path("data") / "split"
 
 
 if __name__ == "__main__":
-    transaction_df = pl.read_csv(RAW_TRANSACTION_DATA)
+    transaction_df = pl.read_parquet(TRANSACTION_DATA)
 
     train_df, val_df, test_df, simul_df = split_data(transaction_df)
 

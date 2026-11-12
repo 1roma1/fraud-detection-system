@@ -31,16 +31,8 @@ app = FastAPI(
 
 
 class PredictionRequest(BaseModel):
-    TransactionAmt: float
-    C1: int 
-    C2: int 
-    C3: int 
-    C4: int 
-    C5: int 
-    C6: int 
-    C7: int 
-    C8: int
-
+    amount: float
+    month: int
 
 class PredictionResponse(BaseModel):
     prediction: int
@@ -61,15 +53,8 @@ def predict(payload: PredictionRequest):
 
     try:
         features = [[
-            payload.TransactionAmt,
-            payload.C1,
-            payload.C2,
-            payload.C3,
-            payload.C4,
-            payload.C5,
-            payload.C6,
-            payload.C7,
-            payload.C8,
+            payload.amount,
+            payload.month
         ]]
 
         prediction = int(model.predict(features)[0])
