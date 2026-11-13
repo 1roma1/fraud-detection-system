@@ -1,9 +1,9 @@
 import os
+
 import polars as pl
 
-from training.data import preprocess_data
 from training.config import DataConfig
-
+from training.data import preprocess_data
 
 if __name__ == "__main__":
     config = DataConfig()

@@ -1,4 +1,5 @@
 from pathlib import Path
+
 from pydantic import BaseModel, Field
 
 
@@ -13,3 +14,8 @@ class DataConfig(BaseModel):
     val_ratio: float = Field(default=0.15, gt=0.0, lt=1.0)
     test_ratio: float = Field(default=0.15, gt=0.0, lt=1.0)
     simul_ratio: float = Field(default=0.1, gt=0.0, lt=1.0)
+
+
+class ExperimentConfig(BaseModel):
+    model_name: str = "xgboost"
+    models_path: Path = Path("models")

@@ -2,9 +2,8 @@ import os
 
 import polars as pl
 
-from training.data import split_data
 from training.config import DataConfig
-
+from training.data import split_data
 
 if __name__ == "__main__":
     config = DataConfig()

@@ -1,11 +1,12 @@
+import time
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-import joblib
+import xgboost as xgb
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
-MODEL_PATH = Path("models") / "logreg.pk"
+MODEL_PATH = Path("models") / "boosting.ubj"
 
 model = None
 
@@ -14,7 +15,8 @@ model = None
 async def lifespan(app: FastAPI):
     global model
     try:
-        model = joblib.load(MODEL_PATH)
+        model = xgb.XGBClassifier()
+        model.load_model(MODEL_PATH)
     except FileNotFoundError:
         raise RuntimeError(
             f"Model file {MODEL_PATH} not found. Please run train.py first."
@@ -31,13 +33,15 @@ app = FastAPI(
 
 
 class PredictionRequest(BaseModel):
-    amount: float
+    hour: int
+    weekday: int
     month: int
+    amount: float
 
 
 class PredictionResponse(BaseModel):
-    prediction: int
     probability: list[float]
+    inference_time: float
 
 
 @app.get("/health")
@@ -52,9 +56,12 @@ def predict(payload: PredictionRequest):
     if model is None:
         raise HTTPException(status_code=503, detail="Model is not loaded.")
 
-    features = [[payload.amount, payload.month]]
+    features = [[payload.hour, payload.weekday, payload.month, payload.amount]]
 
-    prediction = int(model.predict(features)[0])
+    start = time.perf_counter()
     probabilities = model.predict_proba(features)[0].tolist()
+    inference_time = time.perf_counter() - start
 
-    return PredictionResponse(prediction=prediction, probability=probabilities)
+    return PredictionResponse(
+        probability=probabilities, inference_time=round(inference_time, 6)
+    )
