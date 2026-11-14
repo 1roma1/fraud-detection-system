@@ -20,5 +20,5 @@ class DataConfig(BaseModel):
 
 
 class ExperimentConfig(BaseModel):
-    model_name: str = "xgboost"
+    model_name: str = "cboost"
     models_path: Path = Path("models")

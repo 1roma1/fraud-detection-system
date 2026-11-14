@@ -79,4 +79,4 @@ class Experiment:
         print(train_results)
         print(evaluation_results)
 
-        train_results.model.save(self.config.models_path / "boosting.ubj")
+        train_results.model.save(self.config.models_path / "boosting.cbm")
