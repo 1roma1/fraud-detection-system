@@ -1,4 +1,6 @@
+import kagglehub
 import polars as pl
+from kagglehub import KaggleDatasetAdapter
 
 SCHEMA = {
     "user": pl.Int32,
@@ -13,6 +15,16 @@ SCHEMA = {
     "mcc": pl.Int32,
     "is_fraud": pl.Int16,
 }
+
+
+def ingest_data(kaggle_dataset: str, kaggle_file_path: str) -> pl.DataFrame:
+    lf = kagglehub.dataset_load(
+        KaggleDatasetAdapter.POLARS,
+        kaggle_dataset,
+        kaggle_file_path,
+    )
+
+    return lf.collect()
 
 
 def preprocess_data(df: pl.DataFrame) -> pl.DataFrame:

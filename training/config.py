@@ -4,7 +4,10 @@ from pydantic import BaseModel, Field
 
 
 class DataConfig(BaseModel):
-    raw_dataset_path: Path = Path("data/raw/raw_transactions.csv")
+    kaggle_dataset: str = "ealtman2019/credit-card-transactions"
+    kaggle_file_path: str = "credit_card_transactions-ibm_v2.csv"
+
+    raw_dataset_path: Path = Path("data/raw/raw_transactions.parquet")
     prep_dataset_path: Path = Path("data/prep/prep_transactions.parquet")
     train_dataset_path: Path = Path("data/split/train_transactions.parquet")
     val_dataset_path: Path = Path("data/split/val_transactions.parquet")
